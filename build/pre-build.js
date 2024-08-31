@@ -8,7 +8,7 @@ const userAgentRegExp = browserslist.getUserAgentRegExp({ allowHigherVersions: t
 const checkFunction = `export const supportedBrowsers = ${userAgentRegExp};`;
 fs.writeFileSync(path.resolve(__dirname, "../src/supported-browsers.js"), checkFunction);
 
-const firebaseConfig = process.env.FIREBASE_CONFIG;
+const firebaseConfig = import.meta.env.FIREBASE_CONFIG;
 if (firebaseConfig) {
   fs.writeFileSync(
     path.resolve(__dirname, "../src/core/storage/firebase-config.js"),
