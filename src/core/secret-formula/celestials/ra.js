@@ -178,7 +178,7 @@ export const ra = {
     enslavedXP: {
       id: 16,
       reward: "All Memory Chunks produce more Memories based on total time played",
-      effect: () => Decimal.log10(player.records.totalTimePlayed).div(200).add(1),
+      effect: () => Decimal.log10(player.records.thisReversion.time).div(200).add(1),
       pet: "enslaved",
       level: 5,
       displayIcon: `<span class="fas fa-stopwatch"></span>`

@@ -212,6 +212,7 @@ Currency.antimatter = new class extends DecimalCurrency {
     player.records.thisInfinity.maxAM = player.records.thisInfinity.maxAM.max(value);
     player.records.thisEternity.maxAM = player.records.thisEternity.maxAM.max(value);
     player.records.thisReality.maxAM = player.records.thisReality.maxAM.max(value);
+    player.records.thisReversion.maxAM = player.records.thisReversion.maxAM.max(value);
 
     if (Pelle.isDoomed) {
       player.celestials.pelle.records.totalAntimatter = player.celestials.pelle.records.totalAntimatter.max(value);
@@ -274,6 +275,7 @@ Currency.infinityPoints = new class extends DecimalCurrency {
     player.infinityPoints = value;
     player.records.thisEternity.maxIP = player.records.thisEternity.maxIP.max(value);
     player.records.thisReality.maxIP = player.records.thisReality.maxIP.max(value);
+    player.records.thisReversion.maxAM = player.records.thisReversion.maxAM.max(value);
 
     if (Pelle.isDoomed) {
       player.celestials.pelle.records.totalInfinityPoints =
@@ -320,6 +322,7 @@ Currency.eternityPoints = new class extends DecimalCurrency {
   set value(value) {
     player.eternityPoints = value;
     player.records.thisReality.maxEP = player.records.thisReality.maxEP.max(value);
+    player.records.thisReversion.maxEP = player.records.thisReversion.maxEP.max(value);
     if (player.records.bestReality.bestEP.lt(value)) {
       player.records.bestReality.bestEP = value;
       player.records.bestReality.bestEPSet = Glyphs.copyForRecords(Glyphs.active.filter(g => g !== null));
@@ -401,6 +404,7 @@ Currency.realityMachines = new class extends DecimalCurrency {
     const addedThisReality = newValue.minus(player.reality.realityMachines);
     player.reality.realityMachines = newValue;
     player.reality.maxRM = Decimal.max(player.reality.maxRM, newValue);
+    player.records.thisReversion.maxRM = player.records.thisReversion.maxRM.max(newValue);
     if (player.records.bestReality.RM.lt(addedThisReality)) {
       player.records.bestReality.RM = addedThisReality;
       player.records.bestReality.RMSet = Glyphs.copyForRecords(Glyphs.active.filter(g => g !== null));
@@ -421,7 +425,9 @@ Currency.relicShards = new class extends DecimalCurrency {
 Currency.imaginaryMachines = new class extends DecimalCurrency {
   get value() { return player.reality.imaginaryMachines; }
   set value(value) {
-    player.reality.imaginaryMachines = Decimal.clampMax(value, MachineHandler.currentIMCap);
+    const newValue = value.min(MachineHandler.currentIMCap);
+    player.reality.imaginaryMachines = newValue;
+    player.records.thisReversion.maxIM = player.records.thisReversion.maxIM.max(newValue);
   }
 }();
 
@@ -479,3 +485,22 @@ Currency.galaxyGeneratorGalaxies = new class extends DecimalCurrency {
       player.celestials.pelle.galaxyGenerator.spentGalaxies.add(spent);
   }
 }();
+
+Currency.timeCapsules = new (class extends DecimalCurrency {
+  get value() {
+    return player.reversion.timeCapsules;
+  }
+
+  set value(value) {
+    player.reversion.timeCapsules = value;
+  }
+})();
+Currency.reversions = new (class extends DecimalCurrency {
+  get value() {
+    return player.reversion.resetCount;
+  }
+
+  set value(value) {
+    player.reversion.resetCount = value;
+  }
+})();

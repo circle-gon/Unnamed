@@ -21,6 +21,7 @@ import HardResetModal from "@/components/modals/prestige/HardResetModal";
 import RealityModal from "@/components/modals/prestige/RealityModal";
 import ReplicantiGalaxyModal from "@/components/modals/prestige/ReplicantiGalaxyModal";
 import ResetRealityModal from "@/components/modals/prestige/ResetRealityModal";
+import ReversionModal from "@/components/modals/prestige/ReversionModal";
 
 import AnimationOptionsModal from "@/components/modals/options/AnimationOptionsModal";
 import AwayProgressOptionsModal from "@/components/modals/options/AwayProgressOptionsModal";
@@ -209,6 +210,7 @@ Modal.enterDilation = new Modal(EnterDilationModal, 1, GAME_EVENT.REALITY_RESET_
 Modal.exitDilation = new Modal(ExitDilationModal, 1, GAME_EVENT.REALITY_RESET_AFTER);
 Modal.reality = new Modal(RealityModal, 1, GAME_EVENT.REALITY_RESET_AFTER);
 Modal.resetReality = new Modal(ResetRealityModal, 1, GAME_EVENT.REALITY_RESET_AFTER);
+Modal.reversion = new Modal(ReversionModal, 1, GAME_EVENT.REVERSION_RESET_AFTER);
 Modal.celestials = new Modal(EnterCelestialsModal, 1);
 Modal.hardReset = new Modal(HardResetModal, 1);
 Modal.backupWindows = new Modal(BackupWindowModal, 1);

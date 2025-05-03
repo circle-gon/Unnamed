@@ -12,13 +12,13 @@ export const infinityUpgrades = {
   totalTimeMult: {
     id: "timeMult",
     cost: 1,
-    description: "Antimatter Dimensions gain a multiplier based on time played",
-    effect: () => Decimal.pow(Time.totalTimePlayed.totalMinutes.div(2), 0.15),
+    description: () => `Antimatter Dimensions gain a multiplier based on time played${reversionTimeText()}`,
+    effect: () => Decimal.pow(Time.thisReversion.totalMinutes.div(2), 0.15),
     formatEffect: value => formatX(value, 2, 2),
     charged: {
-      description: "Antimatter Dimensions gain a power effect based on time played and Teresa level",
+      description: () => `Antimatter Dimensions gain a power effect${reversionTimeText()} based on time played and Teresa level`,
       effect: () =>
-        Decimal.log10(Decimal.log10(Time.totalTimePlayed.totalMilliseconds))
+        Decimal.log10(Decimal.log10(Time.thisReversion.totalMilliseconds))
           .times(Decimal.pow(Ra.pets.teresa.level, 0.5)).div(150).add(1),
       formatEffect: value => formatPow(value, 4, 4)
     }

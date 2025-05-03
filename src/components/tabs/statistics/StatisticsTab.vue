@@ -44,18 +44,27 @@ export default {
       reality: {
         isUnlocked: false,
         count: new Decimal(),
+        hasBest: false,
         best: TimeSpan.zero,
         bestReal: TimeSpan.zero,
         this: TimeSpan.zero,
         thisReal: TimeSpan.zero,
-        totalTimePlayed: TimeSpan.zero,
         bestRate: new Decimal(),
         bestRarity: 0,
+      },
+      reversion: {
+        isUnlocked: false,
+        count: new Decimal(),
+        best: TimeSpan.zero,
+        bestReal: TimeSpan.zero,
+        this: TimeSpan.zero,
+        thisReal: TimeSpan.zero,
       },
       matterScale: [],
       lastMatterTime: 0,
       paperclips: 0,
       fullTimePlayed: 0,
+      totalTimePlayed: TimeSpan.zero,
     };
   },
   computed: {
@@ -72,6 +81,12 @@ export default {
       return num.gt(0)
         ? `${this.formatDecimalAmount(num)} ${pluralize("Eternity", num.floor())}`
         : "no Eternities";
+    },
+    realityCountString() {
+      const num = this.reality.count;
+      return num.gt(0)
+        ? `${this.formatDecimalAmount(num)} ${pluralize("Reality", num.floor())}`
+        : "no Realities";
     },
     fullGameCompletions() {
       return player.records.fullGameCompletions;
@@ -136,7 +151,7 @@ export default {
         reality.best.setFrom(bestReality.time);
         reality.bestReal.setFrom(bestReality.realTime);
         reality.this.setFrom(records.thisReality.time);
-        reality.totalTimePlayed.setFrom(records.totalTimePlayed);
+        this.totalTimePlayed.setFrom(records.totalTimePlayed);
         // Real time tracking is only a thing once reality is unlocked:
         infinity.thisReal.setFrom(records.thisInfinity.realTime);
         infinity.bankRate = infinity.projectedBanked.div(Decimal.clampMin(33, records.thisEternity.realTime))
@@ -145,6 +160,18 @@ export default {
         reality.thisReal.setFrom(records.thisReality.realTime);
         reality.bestRate.copyFrom(bestReality.RMmin);
         reality.bestRarity = strengthToRarity(bestReality.glyphStrength).clampMin(0);
+      }
+
+      const isReversionUnlocked = progress.isReversionUnlocked;
+      const reversion = this.reversion;
+      const bestReversion = records.bestReversion;
+      reversion.isUnlocked = isReversionUnlocked;
+      if (isReversionUnlocked) {
+        reversion.count.copyFrom(Currency.reversions);
+        reversion.best.setFrom(bestReversion.time);
+        reversion.bestReal.setFrom(bestReversion.realTime);
+        reversion.this.setFrom(records.thisReversion.time);
+        reversion.thisReal.setFrom(records.thisReversion.realTime);
       }
       this.updateMatterScale();
 
@@ -186,7 +213,7 @@ export default {
         <div>You have made a total of {{ format(totalAntimatter, 2, 1) }} antimatter.</div>
         <div>You have played for {{ realTimePlayed }}. (real time)</div>
         <div v-if="reality.isUnlocked">
-          Your existence has spanned {{ reality.totalTimePlayed }} of time. (game time)
+          Your existence has spanned {{ totalTimePlayed }} of time. (game time)
         </div>
         <div>
           Your save was created on {{ startDate }} ({{ saveAge }} ago)
@@ -305,9 +332,14 @@ export default {
       <div :class="realityClassObject()">
         {{ isDoomed ? "Doomed Reality" : "Reality" }}
       </div>
-      <div>You have {{ quantifyInt("Reality", reality.count) }}.</div>
-      <div>Your fastest game-time Reality was {{ reality.best.toStringShort() }}.</div>
-      <div>Your fastest real-time Reality was {{ reality.bestReal.toStringShort() }}.</div>
+      <div>You have {{ realityCountString }}<span v-if="reversion.isUnlocked"> this Reversion</span>.</div>
+      <div v-if="reality.hasBest">
+        Your fastest game-time Reality was {{ reality.best.toStringShort() }}.<br>
+        Your fastest real-time Reality was {{ reality.bestReal.toStringShort() }}.
+      </div>
+      <div v-else>
+        You have no fastest Reality<span v-if="reversion.isUnlocked"> this Reversion</span>.
+      </div>
       <div :class="{ 'c-stats-tab-doomed' : isDoomed }">
         You have spent {{ reality.this.toStringShort() }}
         in this {{ isDoomed ? "Armageddon" : "Reality" }}.
@@ -323,6 +355,26 @@ export default {
         Your best Reality Machines per minute is {{ format(reality.bestRate, 2, 2) }}.
       </div>
       <div>Your best Glyph rarity is {{ formatRarity(reality.bestRarity) }}.</div>
+      <br>
+    </div>
+    <div
+      v-if="reversion.isUnlocked"
+      class="c-stats-tab-subheader c-stats-tab-general"
+    >
+      <div class="c-stats-tab-title c-stats-tab-reversion">
+        Reversion
+      </div>
+      <div>You have {{ quantifyInt("Reversion", reversion.count) }}.</div>
+      <div>
+        Your fastest game-time Reversion was {{ reversion.best.toStringShort() }}.<br>
+        Your fastest real-time Reversion was {{ reversion.bestReal.toStringShort() }}.
+      </div>
+      <div>
+        You have spent {{ reversion.this.toStringShort() }} in this Reversion. ({{
+          reversion.thisReal.toStringShort()
+        }}
+        real time)
+      </div>
       <br>
     </div>
   </div>
@@ -360,5 +412,9 @@ export default {
 
 .c-stats-tab-doomed {
   color: var(--color-pelle--base);
+}
+
+.c-stats-tab-reversion {
+  color: var(--color-reversion);
 }
 </style>

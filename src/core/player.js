@@ -6,14 +6,6 @@ import { AUTOMATOR_MODE, AUTOMATOR_TYPE } from "./automator/automator-backend";
 import { DC } from "./constants";
 import { deepmergeAll } from "@/utility/deepmerge";
 
-function getGlyphTypes() {
-  const v = { ...GlyphInfo };
-  for (const item in GlyphInfo) {
-    if (!GlyphInfo.glyphTypes.includes(item)) delete v[item];
-  }
-  return v;
-}
-
 // This is actually reassigned when importing saves
 // eslint-disable-next-line prefer-const
 window.player = {
@@ -266,6 +258,7 @@ window.player = {
       maxGlyphs: 0,
       slowestBH: DC.D1,
     },
+    reversion: {},
     permanent: {
       emojiGalaxies: DC.D0,
       singleTickspeed: 0,
@@ -288,6 +281,8 @@ window.player = {
       [Number.MAX_VALUE, DC.BEMAX, DC.BEMAX, DC.D1, DC.D1, "", DC.D0]),
     recentRealities: Array.range(0, 10).map(() =>
       [Number.MAX_VALUE, DC.BEMAX, DC.BEMAX, DC.D1, DC.D1, "", DC.D0, DC.D0]),
+    recentReversions: Array.range(0, 10).map(() =>
+      [Number.MAX_VALUE, DC.BEMAX, DC.BEMAX, DC.D1, DC.D1]),
     thisInfinity: {
       time: DC.D0,
       realTime: DC.D0,
@@ -351,6 +346,21 @@ window.player = {
       iMCapSet: [],
       laitelaSet: [],
     },
+    thisReversion: {
+      time: DC.D0,
+      realTime: DC.D0,
+      trueTime: 0,
+      maxAM: DC.D0,
+      maxIP: DC.D0,
+      maxEP: DC.D0,
+      maxRM: DC.D0,
+      maxIM: DC.D0
+    },
+    bestReversion: {
+      time: DC.BEMAX,
+      realTime: DC.BEMAX,
+      trueTime: 0
+    }
   },
   speedrun: {
     isUnlocked: false,
@@ -458,14 +468,13 @@ window.player = {
         select: AUTO_GLYPH_SCORE.LOWEST_SACRIFICE,
         trash: AUTO_GLYPH_REJECT.SACRIFICE,
         simple: 0,
-        types: Object.keys(getGlyphTypes())
-          .filter(t => GlyphInfo.generatedGlyphTypes.includes(t))
+        types: GlyphInfo.generatedGlyphTypes
           .mapToObject(t => t, t => ({
             rarity: new Decimal(),
             score: 0,
             effectCount: 0,
             specifiedMask: [],
-            effectScores: [...Array(GlyphInfo[t].effectIDs.length).keys()].mapToObject(e => GlyphInfo[t].effectIDs[e], () => 0),
+            effectScores: GlyphInfo[t].effectIDs.mapToObject(e => e, () => 0),
           })),
       },
       createdRealityGlyph: false,
@@ -548,6 +557,11 @@ window.player = {
     },
     achTimer: new Decimal(),
     hasCheckedFilter: false,
+  },
+  reversion: {
+    resetCount: DC.D0,
+    timeCapsules: DC.D0,
+    totalTimeCapsules: DC.D0
   },
   blackHole: Array.range(0, 2).map(id => ({
     id,
@@ -858,6 +872,7 @@ window.player = {
       blobHole: false
     },
     confirmations: {
+      reversion: true,
       armageddon: true,
       sacrifice: true,
       challenges: true,
@@ -964,6 +979,10 @@ export const Player = {
     return player.records.thisEternity.maxIP.gte(Player.eternityGoal);
   },
 
+  get canRevert() {
+    return Pelle.isDoomed && player.records.thisInfinity.maxAM.gte(Decimal.pow10(9e15));
+  },
+
   get bestRunIPPM() {
     return GameCache.bestRunIPPM.value;
   },
@@ -1004,6 +1023,9 @@ export const Player = {
     const glyphCount = player.requirementChecks.reality.maxGlyphs;
     // This switch case intentionally falls through because every lower layer should be reset as well
     switch (key) {
+      case "reversion":
+        player.requirementChecks.reversion = {};
+      // eslint-disable-next-line no-fallthrough
       case "reality":
         player.requirementChecks.reality = {
           noAM: true,

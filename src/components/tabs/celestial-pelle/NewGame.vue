@@ -25,7 +25,7 @@ export default {
       this.selectedSetName = GlyphAppearanceHandler.chosenFromModal?.name ?? "None (will choose randomly)";
     },
     startNewGame() {
-      NG.startNewGame();
+      revert();
     },
     openSelectionModal() {
       Modal.cosmeticSetChoice.show();
@@ -40,21 +40,22 @@ export default {
     :style="style"
   >
     <h2>
-      Reset the entire game, but keep Automator Scripts, Study Presets, Secret Themes, Secret Achievements, Options,
-      and Companion Glyph.
+      There is nothing left for you here. Revert back to the start, but keep
+      Automator Scripts, Study Presets, Secret Themes, Secret Achievements, Options,
+      and Companion Glyphs.
     </h2>
-    <h3>You can use the button in the top-right to view the game as it is right now.</h3>
+    <h3>You can use the button in the top-right to view the destruction as it is right now.</h3>
     <div class="c-new-game-button-container">
       <button
         class="c-new-game-button"
         @click="startNewGame"
       >
-        Start over?
+        Revert?
       </button>
     </div>
     <br>
     <h3 v-if="hasMoreCosmetics">
-      For completing the game, you also unlock a new cosmetic set of your choice for Glyphs. These are freely
+      For reaching this far, you also unlock a new cosmetic set of your choice for Glyphs. These are freely
       modifiable once you reach Reality again, but are purely visual and offer no gameplay bonuses.
       <br>
       <button

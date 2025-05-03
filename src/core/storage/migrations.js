@@ -392,7 +392,7 @@ export const migrations = {
     23: player => {
       // We missed presets in effarig format migration
       const updateBitmask = bitmask => {
-        const modifiedBits = [20, 21, 22].map(b => 1 << b).sum();
+        const modifiedBits = [20, 21, 22].map(b => 1 << b).nSum();
         const foundBits = [20, 21, 22].map(b => (bitmask & (1 << b)) !== 0);
         foundBits.push(foundBits.shift());
         let newSubmask = 0;
@@ -431,6 +431,12 @@ export const migrations = {
     83: player => {
       beMigration(player);
     },
+    100: player => {
+      // Add the new records
+      player.records.thisReversion.time = player.records.totalTimePlayed;
+      player.records.thisReversion.realTime = player.records.realTimePlayed;
+      player.records.thisReversion.trueTime = player.records.trueTimePlayed;
+    }
   },
 
   normalizeTimespans(player) {
@@ -581,15 +587,15 @@ export const migrations = {
     }
     if (player.challengeTimes) {
       for (let i = 0; i < player.challengeTimes.length; ++i) {
-        player.challenge.normal.bestTimes[i] = Math.min(player.challenge.normal.bestTimes[i],
-          player.challengeTimes[i]);
+        player.challenge.normal.bestTimes[i] = Decimal.min(player.challenge.normal.bestTimes[i],
+          player.challengeTimes[i]).toNumber();
       }
       delete player.challengeTimes;
     }
     if (player.infchallengeTimes) {
       for (let i = 0; i < player.infchallengeTimes.length; ++i) {
-        player.challenge.infinity.bestTimes[i] = Math.min(player.challenge.infinity.bestTimes[i],
-          player.infchallengeTimes[i]);
+        player.challenge.infinity.bestTimes[i] = Decimal.min(player.challenge.infinity.bestTimes[i],
+          player.infchallengeTimes[i]).toNumber();
       }
       delete player.infchallengeTimes;
     }
@@ -1018,9 +1024,9 @@ export const migrations = {
   },
 
   setTutorialState(player) {
-    if (player.infinities.gt(0) || player.eternities.gt(0) || player.realities.gt(0) || player.galaxies > 0) {
+    if (player.infinities.gt(0) || player.eternities.gt(0) || player.realities.gt(0) || Decimal.gt(player.galaxies, 0)) {
       player.tutorialState = 4;
-    } else if (player.dimensionBoosts > 0) player.tutorialState = TUTORIAL_STATE.GALAXY;
+    } else if (Decimal.gt(player.dimensionBoosts, 0)) player.tutorialState = TUTORIAL_STATE.GALAXY;
   },
 
   migrateLastTenRuns(player) {
@@ -1134,9 +1140,9 @@ export const migrations = {
   },
 
   convertTimeTheoremPurchases(player) {
-    player.timestudy.amBought = new Decimal(player.timestudy.amcost).exponent / 20000 - 1;
-    player.timestudy.ipBought = new Decimal(player.timestudy.ipcost).exponent / 100;
-    player.timestudy.epBought = Math.round(new Decimal(player.timestudy.epcost).log2());
+    player.timestudy.amBought = new Decimal(player.timestudy.amcost).max(1).log10().div(20000).sub(1);
+    player.timestudy.ipBought = new Decimal(player.timestudy.ipcost).max(1).log10().div(100);
+    player.timestudy.epBought = new Decimal(player.timestudy.epcost).log2().round();
 
     delete player.timestudy.amcost;
     delete player.timestudy.ipcost;
@@ -1172,9 +1178,9 @@ export const migrations = {
 
   refactorDoubleIPRebuyable(player) {
     // A bit of a hack, but needs to be done this way to not trigger the non-Decimal assignment crash check code
-    const purchases = new Decimal(player.infMult).log2();
+    const purchases = new Decimal(player.infMult).log2().round();
     delete player.infMult;
-    player.infMult = Math.round(purchases);
+    player.infMult = purchases;
     delete player.infMultCost;
   },
 
@@ -1233,7 +1239,7 @@ export const migrations = {
     this.prePatch(saveData);
     // This adds all the undefined properties to the save which are in player.js
     const player = deepmergeAll([Player.defaultStart, saveData]);
-    const versions = Object.keys(this.patches).map(parseFloat).sort();
+    const versions = Object.keys(this.patches).map(parseFloat).sort((a, b) => a - b);
     let version;
     while ((version = versions.find(v => player.version < v && v < maxVersion)) !== undefined) {
       const patch = this.patches[version];

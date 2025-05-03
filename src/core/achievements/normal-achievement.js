@@ -1,5 +1,6 @@
 import { DC } from "../constants";
 import { GameMechanicState } from "../game-mechanics";
+
 import { SteamRuntime } from "@/steam";
 
 class AchievementState extends GameMechanicState {
@@ -30,6 +31,10 @@ class AchievementState extends GameMechanicState {
 
   get isPrePelle() {
     return this.row < 18;
+  }
+
+  get isPreReversion() {
+    return this.row < 19;
   }
 
   get isUnlocked() {
@@ -110,6 +115,13 @@ export const Achievements = {
     return Achievements.all.filter(ach => ach.isPrePelle);
   },
 
+  /**
+   * @type {AchievementState[]}
+   */
+  get preReversion() {
+    return Achievements.all.filter(ach => ach.isPreReversion);
+  },
+
   get allRows() {
     const count = Achievements.all.map(a => a.row).nMax();
     return Achievements.rows(1, count);
@@ -122,6 +134,11 @@ export const Achievements = {
 
   get prePelleRows() {
     const count = Achievements.prePelle.map(a => a.row).nMax();
+    return Achievements.rows(1, count);
+  },
+
+  get preReversionRows() {
+    const count = Achievements.preReversion.map(a => a.row).nMax();
     return Achievements.rows(1, count);
   },
 

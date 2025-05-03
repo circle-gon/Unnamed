@@ -9,6 +9,13 @@ export default {
   data() {
     return {
       layers: {
+        atom: {
+          name: "Reversion",
+          plural: "Reversions",
+          currency: "Time Capsules",
+          condition: () => PlayerProgress.reversionUnlocked(),
+          getRuns: () => player.records.recentReversions
+        },
         reality: {
           name: "Reality",
           plural: "Realities",

@@ -43,7 +43,7 @@ export function playerInfinityUpgradesOnReset() {
 
   if (PelleUpgrade.keepInfinityUpgrades.canBeApplied) {
     player.infinityUpgrades = new Set([...player.infinityUpgrades].filter(u => infinityUpgrades.has(u)));
-    player.infinityRebuyables = [0, 0, 0];
+    player.infinityRebuyables = [new Decimal(), new Decimal(), new Decimal()];
     GameCache.tickSpeedMultDecrease.invalidate();
     GameCache.dimensionMultDecrease.invalidate();
     return;
@@ -227,6 +227,13 @@ export function resetEternityRuns() {
   GameCache.averageRealTimePerEternity.invalidate();
 }
 
+export function resetRealityRuns() {
+  player.records.recentRealities = Array.from(
+    { length: 10 },
+    () => [Number.MAX_VALUE, DC.BEMAX, DC.BEMAX, DC.D1, DC.D1, "", DC.D0, DC.D0]
+  );
+}
+
 // Player gains 50% of the eternities they would get if they continuously repeated their fastest eternity, if they
 // have the auto-eternity milestone and turned on eternity autobuyer with 0 EP
 export function getEternitiedMilestoneReward(ms, considerMilestoneReached) {
@@ -259,6 +266,12 @@ export function addRealityTime(trueTime, time, realTime, rm, level, realities, a
   player.records.recentRealities.pop();
   player.records.recentRealities.unshift([trueTime, time, realTime, rm.times(ampFactor),
     realities, reality, level, shards.mul(ampFactor), projIM]);
+}
+
+// eslint-disable-next-line max-params
+export function addReversionTime(trueTime, time, realTime, timeCapsules, reversions) {
+  player.records.recentReversions.pop();
+  player.records.recentReversions.unshift([trueTime, time, realTime, timeCapsules, reversions]);
 }
 
 export function gainedInfinities() {
@@ -416,6 +429,7 @@ export function realTimeMechanics(realDiff) {
     player.records.thisInfinity.realTime = player.records.thisInfinity.realTime.add(realDiff);
     player.records.thisEternity.realTime = player.records.thisEternity.realTime.add(realDiff);
     player.records.thisReality.realTime = player.records.thisReality.realTime.add(realDiff);
+    player.records.thisReversion.realTime = player.records.thisReversion.realTime.add(realDiff);
     Enslaved.storeRealTime(realDiff);
     // Most autobuyers will only tick usefully on the very first tick, but this needs to be here in order to allow
     // the autobuyers unaffected by time storage to tick as well
@@ -539,10 +553,14 @@ export function gameLoop(passedDiff, options = {}) {
     player.records.thisReality.realTime = player.records.thisReality.realTime.add(realDiff);
     player.records.thisReality.time = player.records.thisReality.time.add(diff);
 
+    player.records.thisReversion.realTime = player.records.thisReversion.realTime.add(realDiff);
+    player.records.thisReversion.time = player.records.thisReversion.time.add(diff);
+
     player.records.trueTimePlayed += trueDiff;
     player.records.thisInfinity.trueTime += trueDiff;
     player.records.thisEternity.trueTime += trueDiff;
     player.records.thisReality.trueTime += trueDiff;
+    player.records.thisReversion.trueTime += trueDiff;
   }
 
   DeltaTimeState.update(trueDiff, realDiff, diff);

@@ -90,7 +90,7 @@ export const Time = {
    */
   get timeSinceBlackHole() {
     return this.fromMilliseconds(() => {
-      const diff = player.records.totalTimePlayed.sub(player.records.timePlayedAtBHUnlock);
+      const diff = player.records.thisReversion.time.sub(player.records.timePlayedAtBHUnlock);
       return Decimal.max(0, diff);
     });
   },
@@ -304,6 +304,68 @@ export const Time = {
    */
   set bestRealityRealTime(timespan) {
     this.toMilliseconds(timespan, value => player.records.bestReality.realTime = value);
+  },
+
+  /**
+   * @returns {TimeSpan}
+   */
+  get thisReversion() {
+    return this.fromMilliseconds(() => player.records.thisReversion.time);
+  },
+  /**
+     * @param {TimeSpan} timespan
+     */
+  set thisReversion(timespan) {
+    this.toMilliseconds(timespan, value => player.records.thisReversion.time = value);
+  },
+  /**
+     * @returns {TimeSpan}
+     */
+  get thisReversionRealTime() {
+    return this.fromMilliseconds(() => player.records.thisReversion.realTime);
+  },
+  /**
+     * @param {TimeSpan} timespan
+     */
+  set thisReversionRealTime(timespan) {
+    this.toMilliseconds(timespan, value => player.records.thisReversion.realTime = value);
+  },
+  /**
+     * @returns {TimeSpan}
+     */
+  get bestReversion() {
+    return this.fromMilliseconds(() => player.records.bestReversion.time);
+  },
+  /**
+     * @param {TimeSpan} timespan
+     */
+  set bestReversion(timespan) {
+    this.toMilliseconds(timespan, value => player.records.bestReversion.time = value);
+  },
+  /**
+     * @returns {TimeSpan}
+     */
+  get bestReversionRealTime() {
+    return this.fromMilliseconds(() => player.records.bestReversion.realTime);
+  },
+  /**
+     * @param {TimeSpan} timespan
+     */
+  set bestReversionRealTime(timespan) {
+    this.toMilliseconds(timespan, value => player.records.bestReversion.realTime = value);
+  },
+
+  /**
+   * @returns {TimeSpan}
+   */
+  get thisReversionTrueTime() {
+    return this.fromMilliseconds(() => new Decimal(player.records.thisReversion.trueTime));
+  },
+  /**
+     * @param {TimeSpan} timespan
+     */
+  set thisReversionTrueTime(timespan) {
+    this.toMilliseconds(timespan, value => player.records.thisReversion.trueTime = value.toNumber());
   },
 
   /**

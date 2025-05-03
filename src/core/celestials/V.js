@@ -3,6 +3,8 @@ import { GameDatabase } from "../secret-formula/game-database";
 
 import { SpeedrunMilestones } from "../speedrun";
 
+import { DC } from "../constants";
+
 import { Quotes } from "./quotes";
 
 /**

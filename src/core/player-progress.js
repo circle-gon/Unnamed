@@ -15,6 +15,10 @@ export class PlayerProgress {
     return new Decimal(this._player.realities).gt(0);
   }
 
+  get isReversionUnlocked() {
+    return this._player.reversion.resetCount.gt(0);
+  }
+
   get hasFullCompletion() {
     return this._player.records?.fullGameCompletions > 0;
   }
@@ -49,6 +53,10 @@ export class PlayerProgress {
 
   static realityUnlocked() {
     return PlayerProgress.current.isRealityUnlocked;
+  }
+
+  static reversionUnlocked() {
+    return PlayerProgress.current.isReversionUnlocked;
   }
 
   static seenAlteredSpeed() {
